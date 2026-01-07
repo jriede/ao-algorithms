@@ -77,18 +77,20 @@ void setup() {
   println("# hull: ", hull.size());
   
   
-  findHull(curLine);
+  //findHull(curLine);
+  sorty(curLine);
+  println("# right: ", right.size());
+  println("# left: ", left.size());
 
 }
 
-void findHull(int curLine) {
+void sorty(int curLine) {
   int cl = curLine;
   float ang;
   PVector v1, v2;
   // 3. divide points into left & right of line
   // foreach point still in the game: 
   // sort (left or right of line)
-  // left: green, right: blue// 3. divide points into left & right of line
   println("# lines: ", lines.size());
   println("# points: ", points.size());
   println("# hull: ", hull.size());
@@ -96,7 +98,6 @@ void findHull(int curLine) {
    qhPoint pt = points.get(i);
    divLine curl = lines.get(cl);
 
-   //
    float x1 = curl.getp2().x - curl.getp1().x;
    float y1 = curl.getp2().y - curl.getp1().y;
    float x2 = pt.getPos().x - curl.getp1().x;
@@ -111,11 +112,11 @@ void findHull(int curLine) {
  
    if(degrees(ang) < degrees(curl.getAngle()) ) {
      pt.setColor(0,255,0);
-     right.add(pt);
+     left.add(pt);
    }
    else {
      pt.setColor(0,0,255);
-     left.add(pt);
+     right.add(pt);
    }
   }
 
@@ -128,19 +129,25 @@ void draw() {
   
   for (i = 0; i < points.size(); i++) {
    qhPoint pt = points.get(i);
+    fill(102);
+    circle(pt.getPos().x, pt.getPos().y, 4);
+  }  
+  saveFrame("01.png");
+  
+  strokeWeight(2);
+  stroke(255, 44, 44);
+  //println(lines.get(0).p1.x);
+  line(lines.get(0).p1.x, lines.get(0).p1.y, lines.get(0).p2.x, lines.get(0).p2.y);
+  saveFrame("02.png");
+  
+  for (i = 0; i < points.size(); i++) {
+   qhPoint pt = points.get(i);
     fill(pt.getColor());
     stroke(pt.getColor());
     circle(pt.getPos().x, pt.getPos().y, 4);
     line(lines.get(0).p1.x, lines.get(0).p1.y, pt.getPos().x, pt.getPos().y);
   }
-  
-  saveFrame("01.png");
-  
-  strokeWeight(2);
-  stroke(20, 44, 144);
-  //println(lines.get(0).p1.x);
-  line(lines.get(0).p1.x, lines.get(0).p1.y, lines.get(0).p2.x, lines.get(0).p2.y);
-  saveFrame("02.png");
+  saveFrame("03.png");
 }
 
 
