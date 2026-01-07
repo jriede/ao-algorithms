@@ -105,8 +105,6 @@ void findHull(int curLine) {
    v1 = new PVector(x1, y1);
    v2 = new PVector(x2, y2);
    // calculate angle between current line and pt
-   println ("headings: ", v1.heading(), v2.heading());
-   //ang = tan( (pt.getPos().x - curl.getp1().x) / (pt.getPos().y - curl.getp1().y));
    ang = v2.heading();
    //println("angle: " , degrees(ang));
    
