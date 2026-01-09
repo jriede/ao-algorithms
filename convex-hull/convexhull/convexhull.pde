@@ -12,8 +12,8 @@ ArrayList<qhPoint> points = new ArrayList<qhPoint>();
 ArrayList<qhPoint> left = new ArrayList<qhPoint>();
 ArrayList<qhPoint> right = new ArrayList<qhPoint>();
 
-int hullpts, i, xmin, xmax, curLine; 
-float fxmin, fxmax;
+int hullpts, i, xmin, xmax, curLine, idist; 
+float fxmin, fxmax, dist;
 
 void setup() {
   size(500, 500);
@@ -81,7 +81,21 @@ void setup() {
   sorty(curLine);
   println("# right: ", right.size());
   println("# left: ", left.size());
-
+  
+  println("dist: ", dist);
+  // now recursive
+  idist = 10000000;
+  for (i = 0; i < left.size(); i++) {
+    
+    if (distance(lin1, left.get(i)) > dist) {
+      idist = i;
+      dist = distance(lin1, left.get(i));
+    }
+    
+  }
+  
+  println("cur max dist = ", idist, ", ", dist );
+  
 }
 
 void sorty(int curLine) {
@@ -136,7 +150,6 @@ void draw() {
   
   strokeWeight(2);
   stroke(255, 44, 44);
-  //println(lines.get(0).p1.x);
   line(lines.get(0).p1.x, lines.get(0).p1.y, lines.get(0).p2.x, lines.get(0).p2.y);
   saveFrame("02.png");
   
@@ -148,8 +161,23 @@ void draw() {
     line(lines.get(0).p1.x, lines.get(0).p1.y, pt.getPos().x, pt.getPos().y);
   }
   saveFrame("03.png");
+  
+  qhPoint pt = points.get(idist);
+  stroke(255, 30, 30);
+  circle(pt.getPos().x, pt.getPos().y, 8);
+  saveFrame("04.png");
 }
 
+
+float distance(divLine line, qhPoint pt) {
+  // d (p, line(a,vec(u)) = || AP x u || / || u || where AP = P-A
+  PVector ap = new PVector(pt.getPos().x - line.getp1().x, pt.getPos().y - line.getp1().y);
+  PVector u = pt.getPos();
+  PVector crs = ap.cross(u);
+  float d = crs.mag() / u.mag();
+  print("distance: ", d);
+  return d;
+}
 
 class divLine { 
   PVector p1, p2;
