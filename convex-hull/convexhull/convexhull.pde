@@ -1,8 +1,8 @@
 // aoa/convex-hull
 // https://github.com/jriede/ao-algorithms/convex-hull
-// jlenke, 2026-01-06
+// jlenke, 2026-01-09
 
-final int COUNT = 20; // max number of points
+final int COUNT = 16; // max number of points
 PVector[] pts; // points to find convex hull for
 
 ArrayList<qhPoint> hull = new ArrayList<qhPoint>();
@@ -35,30 +35,39 @@ void setup() {
     points.add(new qhPoint(pts[i]));
   }
   
+  
+  
+}
+
+void init() {
+  qhPoint ptt;
+  
   // 1. find points with min(x), max(x) (p1, p2)
   // find min(x)
   xmin = 501;
   fxmin = 501;
-  for (i=0; i<COUNT; i++) {
-    //println(fxmin, xmin);
-    if (pts[i].x < fxmin) {
+  for (i = 0; i < points.size(); i++) {
+    ptt = points.get(i);
+    if (ptt.getPos().x < fxmin) {
       xmin = i;
-      fxmin = pts[i].x;
-      //println(xmin);
+      fxmin = ptt.getPos().x;
     }
   }
+   //println("xmin: ", xmin, ", ", fxmin);
   
   // find max(x)
   xmax = 0;
   fxmax = 0;
-  for (i=0; i<COUNT; i++) {
-    //println(fxmax, xmax);
-    if (pts[i].x > fxmax) {
+   for (i = 0; i < points.size(); i++) {
+    ptt = points.get(i);
+    if (ptt.getPos().x > fxmax) {
+      //println("xmax: ", xmax, ", ", fxmax);
       xmax = i;
-      fxmax = pts[i].x;
-      //println(xmax);
+      fxmax = ptt.getPos().x;
     }
   }
+  println("xmin = ", xmin, ", xmax = ", xmax);
+  
   
   hull.add(new qhPoint(pts[xmin]));
   hull.add(new qhPoint(pts[xmax]));
@@ -67,64 +76,66 @@ void setup() {
   divLine lin1 = new divLine(new PVector(pts[xmin].x, pts[xmin].y), 
   new PVector(pts[xmax].x, pts[xmax].y));
   lines.add(lin1);
+  
   // remove hull points from points arraylist
   points.remove(xmin);
   points.remove(xmax);
+  printInfo("after pts remove");
+ 
+}
+
+int getMaxDist(int cline, ArrayList<qhPoint> ptlist ) {
+  // cline == current line
+  int idi = 100000;
+  float dist = 0;
+  println("cline:  ", cline);
   
+  for (i = 0; i < ptlist.size(); i++) {
+   
+    if (distance(cline, ptlist.get(i)) > dist) {
+      idi = i;
+      dist = distance(cline, ptlist.get(i));
+    }
+  }
   
+  //println("cur max dist = ", idist, ", ", dist );
+  return idist;
+}
+
+void printInfo(String txt) {
+  println(txt);
   println("# lines: ", lines.size());
   println("# points: ", points.size());
   println("# hull: ", hull.size());
   
-  
-  //findHull(curLine);
-  sorty(curLine);
   println("# right: ", right.size());
   println("# left: ", left.size());
-  
-  println("dist: ", dist);
-  // now recursive
-  idist = 10000000;
-  for (i = 0; i < left.size(); i++) {
-    
-    if (distance(lin1, left.get(i)) > dist) {
-      idist = i;
-      dist = distance(lin1, left.get(i));
-    }
-    
-  }
-  
-  println("cur max dist = ", idist, ", ", dist );
-  
 }
 
 void sorty(int curLine) {
   int cl = curLine;
-  float ang;
+  float ang; // angle between
+  float lang; // line angle
   PVector v1, v2;
   // 3. divide points into left & right of line
   // foreach point still in the game: 
   // sort (left or right of line)
-  println("# lines: ", lines.size());
-  println("# points: ", points.size());
-  println("# hull: ", hull.size());
+  printInfo("in sorty()");
   for (i = 0; i < points.size(); i++) {
    qhPoint pt = points.get(i);
    divLine curl = lines.get(cl);
+   v1 = curl.getVec();
 
-   float x1 = curl.getp2().x - curl.getp1().x;
-   float y1 = curl.getp2().y - curl.getp1().y;
    float x2 = pt.getPos().x - curl.getp1().x;
    float y2 = pt.getPos().y - curl.getp1().y;
    
-   v1 = new PVector(x1, y1);
    v2 = new PVector(x2, y2);
    // calculate angle between current line and pt
+   lang = curl.getAngle();
    ang = v2.heading();
-   //println("angle: " , degrees(ang));
+   //println("lang, ang, Delta: ", degrees(lang), ", ", degrees(ang), ", ", degrees(ang) - degrees(lang));
    
- 
-   if(degrees(ang) < degrees(curl.getAngle()) ) {
+   if(degrees(ang) - degrees(lang) < 0) {
      pt.setColor(0,255,0);
      left.add(pt);
    }
@@ -145,23 +156,29 @@ void draw() {
    qhPoint pt = points.get(i);
     fill(102);
     circle(pt.getPos().x, pt.getPos().y, 4);
+    text(str(i), pt.getPos().x + 3, pt.getPos().y);
   }  
   saveFrame("01.png");
+  this.init();
   
   strokeWeight(2);
   stroke(255, 44, 44);
   line(lines.get(0).p1.x, lines.get(0).p1.y, lines.get(0).p2.x, lines.get(0).p2.y);
   saveFrame("02.png");
   
+  sorty(curLine);
+  printInfo("after sorty()");
+  
   for (i = 0; i < points.size(); i++) {
    qhPoint pt = points.get(i);
     fill(pt.getColor());
     stroke(pt.getColor());
     circle(pt.getPos().x, pt.getPos().y, 4);
-    line(lines.get(0).p1.x, lines.get(0).p1.y, pt.getPos().x, pt.getPos().y);
+    //line(lines.get(0).p1.x, lines.get(0).p1.y, pt.getPos().x, pt.getPos().y);
   }
   saveFrame("03.png");
   
+  idist = getMaxDist(0, left);
   qhPoint pt = points.get(idist);
   stroke(255, 30, 30);
   circle(pt.getPos().x, pt.getPos().y, 8);
@@ -169,24 +186,27 @@ void draw() {
 }
 
 
-float distance(divLine line, qhPoint pt) {
+float distance(int l, qhPoint pt) {
   // d (p, line(a,vec(u)) = || AP x u || / || u || where AP = P-A
+  divLine line = lines.get(l);
   PVector ap = new PVector(pt.getPos().x - line.getp1().x, pt.getPos().y - line.getp1().y);
   PVector u = pt.getPos();
   PVector crs = ap.cross(u);
   float d = crs.mag() / u.mag();
-  print("distance: ", d);
+  //print("distance: ", d);
   return d;
 }
 
 class divLine { 
-  PVector p1, p2;
+  PVector p1, p2, p3;
   float angle;
   
   divLine (PVector pp1, PVector pp2) {  
     p1 = new PVector(pp1.x, pp1.y); 
     p2 = new PVector(pp2.x, pp2.y);  
-    angle = tan((pp2.y -pp1.y)/(pp2.x-pp1.x));
+    p3 = new PVector(pp2.x - pp1.x, pp2.y - pp1.y);
+    //angle = tan((pp2.y -pp1.y)/(pp2.x-pp1.x));
+    angle = p3.heading();
     print("line angle = ", degrees(angle));
   } 
   
@@ -196,6 +216,10 @@ class divLine {
   
   PVector getp2() {
     return this.p2;
+  }
+  
+  PVector getVec() {
+    return this.p3;
   }
   
   float getAngle() {
